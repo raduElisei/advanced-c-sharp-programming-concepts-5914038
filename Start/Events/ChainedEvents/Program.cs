@@ -12,21 +12,26 @@ namespace ChainedEvents
         // declare the event handler
         public event MyEventHandler ValueChanged;
         // TODO4: Use the EventArgs class
-
+        public event EventHandler<ObjChangedEventArgs> ObjChanged;
 
         public string Val
         {
-            set {
+            set
+            {
                 this.TheVal = value;
                 // when the value changes, fire the event
                 this.ValueChanged(TheVal);
                 // TODO5: Use the custom event handler
-
+                this.ObjChanged(this, new ObjChangedEventArgs() { PropChanged = "Val" });
             }
         }
     }
 
     // TODO3: Create a subclass of EventArgs for our use
+    class ObjChangedEventArgs : EventArgs
+    {
+        public string PropChanged { get; set; }
+    }
 
     class Program
     {
@@ -35,19 +40,27 @@ namespace ChainedEvents
             // create the test class
             EventPublisher obj = new EventPublisher();
             // TODO1: Connect multiple event handlers
-
-
+            obj.ValueChanged += changeListener1;
+            obj.ValueChanged += changeListener2;
             // TODO2: Use an anonymous delegate as the event handler
-
+            obj.ValueChanged += delegate (string s)
+            {
+                System.Console.WriteLine("This came from the anon handler.");
+            };
 
             // TODO6: Listen for the custom event we defined with EventArgs
-
+            obj.ObjChanged += (sender, e) =>
+            {
+                System.Console.WriteLine($"{sender.GetType()} had the {e.PropChanged} changed");
+            };
 
             string str;
-            do {
+            do
+            {
                 Console.WriteLine("Enter a value: ");
                 str = Console.ReadLine();
-                if (!str.Equals("exit")) {
+                if (!str.Equals("exit"))
+                {
                     obj.Val = str;
                 }
             } while (!str.Equals("exit"));
